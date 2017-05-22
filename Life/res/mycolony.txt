@@ -1,0 +1,15 @@
+5
+9
+-X-------
+---------
+---XXX---
+-X-----XX
+-------XX
+
+# mohit-chawla
+# I just made this one up. If you start 
+# with symmetric colonies, you tend to
+# get interesting kaleidoscopic effects.
+# This one evolves to a repetitive colony
+# after a burst of energy out of the
+# starting gate. 
