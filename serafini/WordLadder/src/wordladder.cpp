@@ -30,6 +30,98 @@ static string SAME_LEN_ERR_MSG = "The two words must be the same length.";
 static string DICT_DNE_ERR_MSG = "The two words must be found in the dictionary.";
 static string DUPLICATE_WRODS_ERR_MSG = "The two words must be different.";
 
+//function prototypes
+bool existsInDictionary(string word,HashMap<string,bool> &dictMap);
+void loadDictionary(string ipFileName,std::ifstream &in, HashMap<string,bool> &dictMap);
+bool validInput(string word1, string word2,HashMap<string,bool> &dictMap);
+Stack<string> stackCopy(Stack<string> stack);
+void printAnswer(string word2, Stack<string> stack, string word1);
+void testCaseReset(Vector<string>& usedKeys, HashMap<string,bool>&dictMap);
+void printIntro();
+
+int main() {
+
+    string ipFileName;
+    string word1;
+    string word2;
+    HashMap<string,bool> dictMap ;
+    //Used to keep track of keys used for each Tc, cleared after each Tc
+    Vector<string> usedKeys;
+    ifstream in;
+    //print program intro
+    printIntro();
+
+    ipFileName = getLine(DICTIONARY_FILE_NAME_PROMPT);
+    while (!fileExists(ipFileName)) {
+      // case when user-specified file DNE
+      cout << BAD_FILE_REPROMPT << endl;
+      ipFileName = getLine(DICTIONARY_FILE_NAME_PROMPT);
+    }
+    //load the dictionary from file into HashMap
+    loadDictionary(ipFileName,in,dictMap);
+
+    while(1){
+        word1 = getLine(WORD_1_PROMPT);
+        if(word1.length()==0)
+            break;
+        word1 = toLowerCase(word1);
+        word2 = getLine(WORD_2_PROMPT);
+        if(word2.length()==0)
+            break;
+        word2 = toLowerCase(word2);
+        if(validInput(word1,word2,dictMap)){
+            //calculate length at once to avoid recomputations later
+            int length = (int)word1.length();
+            Queue<Stack<string>> queue;
+            Stack<string> initialStack;
+            initialStack.add(word1);
+            queue.add(initialStack);
+            usedKeys.add(word1);
+            bool solved = false;
+            while(!queue.isEmpty() && !solved){
+               //partialLadder dequeued from main queue
+               Stack<string> partialLadder = queue.dequeue();
+               //get word at the top of the partialLadder(Stack)
+               string topWord = partialLadder.top();
+               for(int i=0;i<length;i++){
+                   for(int j=97;j<123;j++){
+                       if(topWord[i]!=(char)j){
+                           //temp string stores variations of the original topWord
+                           string temp = topWord;
+                           temp[i] = (char)j;
+                           if(existsInDictionary(temp,dictMap) && !dictMap.get(temp)){
+                                //word exists in dict and unused;
+                                dictMap.put(temp,true); //use this word
+                                usedKeys.add(temp);
+                                if(equalsIgnoreCase(temp,word2)){
+                                    printAnswer(word2,partialLadder,word1);
+                                    solved =true;
+                                    break;
+                                }else{
+                                    //copy partialLadder, push new word, queue it
+                                    Stack<string> partialLadderCopy = stackCopy(partialLadder);
+                                    partialLadderCopy.push(temp);
+                                    queue.enqueue(partialLadderCopy);
+                                }
+                           }
+                       }
+                   }
+               }
+            }
+            if(!solved){
+                //case when no solution exists
+                cout<<"No word ladder found from "<<word2<<" back to "<<word1<<"."<<endl;
+            }
+        }
+        //reset operations after each Tc
+        testCaseReset(usedKeys,dictMap);
+    }
+    cout << TERMINATION_MSG << endl;
+    return 0;
+}
+
+
+
 /*
 * Test if a word exists in the dictionary
 * @param
@@ -100,10 +192,13 @@ Stack<string> stackCopy(Stack<string> stack){
 * Prints the ladder using the stack
 * @param
 *   stack:HashMap<string,bool>
+*   string:word1
+*   string:word2
 * @return
 */
-void printAnswer(Stack<string> stack){
-    //cout<<"Size of path: "<<stack.size()<<endl;
+void printAnswer(string word2, Stack<string> stack, string word1){
+    cout<<"A ladder from "<<word2<<" back to "<<word1<<":"<<endl;
+    cout<<word2<<" ";
     while(!stack.isEmpty()){
         cout<<stack.pop()<<" ";
     }
@@ -135,82 +230,4 @@ void printIntro(){
     cout<<"Please give me two English words, and I will change the"<<endl;
     cout<<"first into the second by changing one letter at a time."<<endl;
     cout<<endl;
-}
-
-int main() {
-
-    string ipFileName;
-    string word1;
-    string word2;
-    HashMap<string,bool> dictMap ;
-    Vector<string> usedKeys;
-    ifstream in;
-
-    printIntro();
-    ipFileName = getLine(DICTIONARY_FILE_NAME_PROMPT);
-    while (!fileExists(ipFileName)) {
-      // case when user-specified file DNE
-      cout << BAD_FILE_REPROMPT << endl;
-      ipFileName = getLine(DICTIONARY_FILE_NAME_PROMPT);
-    }
-    //load the dictionary from file into HashMap
-    loadDictionary(ipFileName,in,dictMap);
-
-    while(1){
-        word1 = getLine(WORD_1_PROMPT);
-        if(word1.length()==0)
-            break;
-        word1 = toLowerCase(word1);
-        word2 = getLine(WORD_2_PROMPT);
-        if(word2.length()==0)
-            break;
-        word2 = toLowerCase(word2);
-        if(validInput(word1,word2,dictMap)){
-            int length = (int)word1.length();
-            Queue<Stack<string>> queue;
-            Stack<string> s;
-            s.add(word1);
-            queue.add(s);
-            usedKeys.add(word1);
-            bool solved = false;
-            while(!queue.isEmpty() && !solved){
-               Stack<string> partialLadder = queue.dequeue();
-               string topWord = partialLadder.top();
-               for(int i=0;i<length;i++){
-                   for(int j=97;j<123;j++){
-                       if(topWord[i]!=(char)j){
-                           string temp = topWord;
-                           temp[i] = (char)j;
-                           if(existsInDictionary(temp,dictMap) && !dictMap.get(temp)){
-                               //cout<<"topWord,temp: "<<topWord<<","<<temp<<". ";
-                                //word exists in dict and unused;
-                                dictMap.put(temp,true); //use this word
-                                usedKeys.add(temp);
-                                if(equalsIgnoreCase(temp,word2)){
-                                    //cout<<"hurray soln is found"<<endl;
-                                    cout<<"A ladder from "<<word2<<" back to "<<word1<<":"<<endl;
-                                    cout<<word2<<" ";
-                                    printAnswer(partialLadder);
-                                    solved =true;
-                                    break;
-                                }else{
-                                    Stack<string> partialLadderCopy = stackCopy(partialLadder);
-                                    //cout<<"copiedStack is"<<partialLadderCopy.toString()<<endl;
-                                    partialLadderCopy.push(temp);
-                                    queue.enqueue(partialLadderCopy);
-                                }
-                           }
-                       }
-                   }
-               }
-            }
-            if(!solved){
-                cout<<"No word ladder found from "<<word2<<" back to "<<word1<<"."<<endl;
-            }
-        }
-        //reset operations after each Tc
-        testCaseReset(usedKeys,dictMap);
-    }
-    cout << TERMINATION_MSG << endl;
-    return 0;
 }

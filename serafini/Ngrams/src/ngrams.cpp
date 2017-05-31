@@ -1,6 +1,9 @@
-// This is the CPP file you will edit and turn in.
-// Also remove these comments here and add your own.
-// TODO: remove this comment header
+/*
+ * author: Mohit Chawla | mc2683@cornell.edu | Cornell Tech Connective Media
+ * Program
+ * decription:CS106b-assignment-2-serafini-Ngrams-http://web.stanford.edu/class/archive/cs/cs106b/cs106b.1164//assn/serafini.html
+ * date: 29 May 2017
+ */
 
 #include <cctype>
 #include <cmath>
@@ -14,9 +17,9 @@
 #include "Vector.h"
 #include "random.h"
 
-
 using namespace std;
 
+//GLOBAL-CONSTANTS
 static string INPUT_FILE_NAME_PROMPT =  "Input file name? ";
 static string BAD_FILE_REPROMPT = "Unable to open that file.  Try again.";
 static string N_INPUT_PROMPT = "Value of N? ";
@@ -24,27 +27,10 @@ static string N_INPUT_ERR_MSG = "N must be 2 or greater.";
 static string NUM_WORDS_PROMPT = "# of random words to generate (0 to quit)? ";
 static string EXIT_MSG = "Exiting.";
 
-Vector<string> getWindow(Vector<string> allWords, int start, int size){
-    Vector<string> window;
-    int end = allWords.size();
-    for(int i=0;i<size;i++){
-        if(start+i>=end)
-            start = -i;
-        window.add(allWords.get(start+i));
-    }
-    cout<<"window:"<<window.toString()<<endl;
-    return window;
-}
-string nextWord(Vector<string> allWords, int start){
-    return allWords.get(start%allWords.size());
-}
-void printIntro(){
-    cout<<"Welcome to CS 106B Random Writer ('N-Grams')."<<endl;
-    cout<<"This program makes random text based on a document."<<endl;
-    cout<<"Give me an input file and an 'N' value for groups"<<endl;
-    cout<<"of words, and I'll create random text for you."<<endl;
-    cout<<endl;
-}
+//function prototypes
+Vector<string> getWindow(Vector<string> allWords, int start, int size);
+string nextWord(Vector<string> allWords, int start);
+void printIntro();
 
 int main() {
     printIntro();
@@ -70,7 +56,6 @@ int main() {
         cout<<N_INPUT_ERR_MSG<<endl;
         N = getInteger(N_INPUT_PROMPT);
     }
-    N=4;
     for(int i=0;i<allWords.size();i++){
         Vector<string> window = getWindow(allWords,i,N-1);
         string nextword = nextWord(allWords,i+N-1);
@@ -121,4 +106,51 @@ int main() {
     }
     cout << "Exiting." << endl;
     return 0;
+}
+
+/*
+ * Get window of given size
+ * @param
+ *  Vector<string>:allWords
+ *  int:start
+ *  int:size
+ * @return
+ *  Vector<string>:window
+*/
+Vector<string> getWindow(Vector<string> allWords, int start, int size){
+    Vector<string> window;
+    int end = allWords.size();
+    for(int i=0;i<size;i++){
+        if(start+i>=end)
+            start = -i;
+        window.add(allWords.get(start+i));
+    }
+    cout<<"window:"<<window.toString()<<endl;
+    return window;
+}
+
+/*
+ * Get next word from the vectoe
+ * @param
+ *  Vector<string>:allWords
+ *  int:start
+ * @return
+ *  string
+*/
+string nextWord(Vector<string> allWords, int start){
+    return allWords.get(start%allWords.size());
+}
+
+/*
+ * Get window of given size
+ * @param
+ * @return
+ *  void
+*/
+void printIntro(){
+    cout<<"Welcome to CS 106B Random Writer ('N-Grams')."<<endl;
+    cout<<"This program makes random text based on a document."<<endl;
+    cout<<"Give me an input file and an 'N' value for groups"<<endl;
+    cout<<"of words, and I'll create random text for you."<<endl;
+    cout<<endl;
 }
