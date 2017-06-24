@@ -32,7 +32,7 @@ public:
     friend ostream& operator <<(ostream& out, const LinkedPriorityQueue& queue);
 
 private:
-    ListNode* queue;
+    ListNode* head;
 };
 
 #endif

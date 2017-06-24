@@ -7,8 +7,7 @@
 #include "LinkedPriorityQueue.h"
 
 LinkedPriorityQueue::LinkedPriorityQueue() {
-    ListNode *head = NULL;
-    LinkedPriorityQueue::queue = head;
+    head = NULL;
 }
 
 LinkedPriorityQueue::~LinkedPriorityQueue() {
@@ -17,48 +16,65 @@ LinkedPriorityQueue::~LinkedPriorityQueue() {
 }
 
 void LinkedPriorityQueue::changePriority(string value, int newPriority) {
-    // TODO: implement
-
+    ListNode *node = head;
+    while(node->value!=value){
+        node=node->next;
+    }
+    node->priority=newPriority;
 }
 
 void LinkedPriorityQueue::clear() {
-    LinkedPriorityQueue::queue = NULL;
-
+   head=NULL;
 }
 
 string LinkedPriorityQueue::dequeue() {
-    string headNodeName = LinkedPriorityQueue::queue->value;
-    ListNode* prevHead = LinkedPriorityQueue::queue;
-    LinkedPriorityQueue::queue = LinkedPriorityQueue::queue->next;
+    string headNodeName = head->value;
+    ListNode* prevHead = head;
+    head = head->next;
     //free memory to prevent memory leak
     prevHead = NULL;
     return headNodeName;
 }
 
 void LinkedPriorityQueue::enqueue(string value, int priority) {
-    ListNode newNode = ListNode::ListNode(value,priority,NULL);
-    ListNode* node = LinkedPriorityQueue::queue;
-    while(node->priority<=priority || node->next!=NULL){
-        newNode.next=node->next==NULL?NULL:node->next;
-        node->next = &newNode;
+    ListNode* newNode = new ListNode(value,priority);
+
+    if(head==NULL){
+        head=newNode;
+    }else{
+        ListNode* node = head;
+        ListNode*prev;
+        while(node->priority<=priority){
+            prev=node;
+            node=node->next;
+            if(node==NULL)
+                break;
+        }
+        if(node==head){
+            head=newNode;
+            newNode->next=node;
+        }else{
+            prev->next=newNode;
+            newNode->next=node;
+        }
     }
 }
 
 bool LinkedPriorityQueue::isEmpty() const {
-    return LinkedPriorityQueue::queue ==NULL;
+    return head ==NULL;
 }
 
 string LinkedPriorityQueue::peek() const {
-    return LinkedPriorityQueue::queue->value;
+    return head->value;
 }
 
 int LinkedPriorityQueue::peekPriority() const {
-    return LinkedPriorityQueue::queue->priority;
+    return head->priority;
 }
 
 int LinkedPriorityQueue::size() const {
     int size = 0;
-    ListNode* node = LinkedPriorityQueue::queue;
+    ListNode* node = head;
     while(node!=NULL){
         size++;
         node=node->next;
@@ -67,6 +83,12 @@ int LinkedPriorityQueue::size() const {
 }
 
 ostream& operator<<(ostream& out, const LinkedPriorityQueue& queue) {
-    // TODO: implement
+    ListNode *node =queue.head;
+    out<<"{";
+    while(node!=NULL){
+        out<<"\""+node->value+"\":"+std::to_string(node->priority);
+        node=node->next;
+    }
+    out<<"}";
     return out;
 }
