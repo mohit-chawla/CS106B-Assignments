@@ -32,8 +32,7 @@ public:
     friend ostream& operator <<(ostream& out, const LinkedPriorityQueue& queue);
 
 private:
-    // TODO: add any other member functions/variables necessary
-
+    ListNode* queue;
 };
 
 #endif
