@@ -44,7 +44,7 @@ void LinkedPriorityQueue::enqueue(string value, int priority) {
     }else{
         ListNode* node = head;
         ListNode*prev;
-        while(node->priority<=priority){
+        while(node->priority<priority || (node->value<value && node->priority==priority)){
             prev=node;
             node=node->next;
             if(node==NULL)
