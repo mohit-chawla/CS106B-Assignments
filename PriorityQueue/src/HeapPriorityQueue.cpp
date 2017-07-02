@@ -7,8 +7,10 @@
 #include "HeapPriorityQueue.h"
 
 HeapPriorityQueue::HeapPriorityQueue() {
-    // TODO: implement
-
+    arrayCapacity = 1000;
+    node q[1000];
+    queueSize = 1;
+    queue = q;
 }
 
 HeapPriorityQueue::~HeapPriorityQueue() {
@@ -17,46 +19,91 @@ HeapPriorityQueue::~HeapPriorityQueue() {
 }
 
 void HeapPriorityQueue::changePriority(string value, int newPriority) {
-    // TODO: implement
-
+    for(int i=1;i<queueSize;i++){
+        if(queue[i].name==value){
+            queue[i].priority=newPriority;
+            break;
+        }
+    }
 }
 
 void HeapPriorityQueue::clear() {
-    // TODO: implement
-
+    queueSize = 1;
 }
 
 string HeapPriorityQueue::dequeue() {
-    // TODO: implement
-    return "";   // remove this
+    string toReturn = queue[1].name;
+    queueSize--;
+    queue[1].name = queue[queueSize].name;
+    queue[1].priority = queue[queueSize].priority;
+    cout<<"Shifted last node"<<queue[queueSize].name<<" to root";
+    int child = 3;
+    int temp = 1;
+    int tempP;
+    string tempVal;
+    while(child < queueSize && queue[child].priority<=queue[temp].priority){
+        //Check for tie and break tie appropriately
+        if(queue[child].priority==queue[temp].priority && queue[child].name>queue[temp].name)
+            break;
+        //swap otherwise
+        tempP = queue[temp].priority;
+        tempVal = queue[temp].name;
+        queue[temp].name = queue[child].name;
+        queue[temp].priority = queue[child].priority;
+        queue[child].name = tempVal;
+        queue[child].priority = tempP;
+        temp = child;
+        child = 2*child+1;
+    }
+    return toReturn;
 }
 
 void HeapPriorityQueue::enqueue(string value, int priority) {
-    // TODO: implement
-
+    queue[queueSize].name=value;
+    queue[queueSize].priority=priority;
+    int parent = queueSize/2;
+    int tempP;
+    int temp = queueSize;
+    string tempVal;
+    while(parent>0 && queue[parent].priority>=priority){
+        //Check for tie and break tie appropriately
+        if(queue[parent].priority == priority && queue[parent].name<value)
+            break;
+        //swap otherwise
+        tempP = queue[parent].priority;
+        tempVal = queue[parent].name;
+        queue[parent].priority = priority;
+        queue[parent].name = value;
+        queue[temp].name = tempVal;
+        queue[temp].priority = tempP;
+        temp = parent;
+        parent = parent/2;
+    }
+    queueSize++;
 }
 
 bool HeapPriorityQueue::isEmpty() const {
-    // TODO: implement
-    return false;   // remove this
+    return queueSize == 1;   // remove this
 }
 
 string HeapPriorityQueue::peek() const {
-    // TODO: implement
-    return "";   // remove this
+    return queue[1].name;
 }
 
 int HeapPriorityQueue::peekPriority() const {
-    // TODO: implement
-    return 0;   // remove this
+    return queue[1].priority;
 }
 
 int HeapPriorityQueue::size() const {
-    // TODO: implement
-    return 0;   // remove this
+    return queueSize-1;
 }
 
 ostream& operator<<(ostream& out, const HeapPriorityQueue& queue) {
-    // TODO: implement
+    out<<"{";
+    for(int i=1;i<queue.queueSize;i++){
+            out<<"\""+queue.queue[i].name+"\":"+std::to_string(queue.queue[i].priority);
+            out<< (i<queue.queueSize-1?",":"");
+    }
+    out<<"}";
     return out;
 }

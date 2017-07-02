@@ -30,8 +30,13 @@ public:
     friend ostream& operator <<(ostream& out, const HeapPriorityQueue& queue);
 
 private:
-    // TODO: add any other member functions/variables necessary
-
+    struct node{
+        string name;
+        int priority;
+    };
+    node * queue;
+    int queueSize;
+    int arrayCapacity;
 };
 
 #endif
