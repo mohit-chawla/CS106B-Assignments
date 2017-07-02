@@ -5,7 +5,7 @@
 // TODO: remove this comment header
 
 #include "HeapPriorityQueue.h"
-
+#include "queue.h"
 HeapPriorityQueue::HeapPriorityQueue() {
     arrayCapacity = 1000;
     node q[1000];
@@ -31,14 +31,20 @@ void HeapPriorityQueue::clear() {
     queueSize = 1;
 }
 
+
 string HeapPriorityQueue::dequeue() {
     string toReturn = queue[1].name;
     queueSize--;
     queue[1].name = queue[queueSize].name;
     queue[1].priority = queue[queueSize].priority;
     cout<<"Shifted last node"<<queue[queueSize].name<<" to root";
-    int child = 3;
     int temp = 1;
+    int child;
+    if(queue[temp*2].priority==queue[temp*2+1].priority){
+        child = queue[temp*2].name<queue[temp*2+1].name?temp*2:temp*2+1;
+    }else{
+        child = queue[temp*2].priority<queue[temp*2+1].priority?temp*2:temp*2+1;
+    }
     int tempP;
     string tempVal;
     while(child < queueSize && queue[child].priority<=queue[temp].priority){
@@ -53,7 +59,11 @@ string HeapPriorityQueue::dequeue() {
         queue[child].name = tempVal;
         queue[child].priority = tempP;
         temp = child;
-        child = 2*child+1;
+        if(queue[temp*2].priority==queue[temp*2+1].priority){
+            child = queue[temp*2].name<queue[temp*2+1].name?temp*2:temp*2+1;
+        }else{
+            child = queue[temp*2].priority<queue[temp*2+1].priority?temp*2:temp*2+1;
+        }
     }
     return toReturn;
 }
@@ -79,6 +89,7 @@ void HeapPriorityQueue::enqueue(string value, int priority) {
         temp = parent;
         parent = parent/2;
     }
+
     queueSize++;
 }
 
@@ -101,8 +112,8 @@ int HeapPriorityQueue::size() const {
 ostream& operator<<(ostream& out, const HeapPriorityQueue& queue) {
     out<<"{";
     for(int i=1;i<queue.queueSize;i++){
-            out<<"\""+queue.queue[i].name+"\":"+std::to_string(queue.queue[i].priority);
-            out<< (i<queue.queueSize-1?",":"");
+        out<<"\""+queue.queue[i].name+"\":"+std::to_string(queue.queue[i].priority);
+        out<< (i<queue.queueSize-1?",":"");
     }
     out<<"}";
     return out;
