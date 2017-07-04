@@ -32,7 +32,6 @@ bool dfs(BasicGraph& graph, Vertex* start, Vertex* end, Vector<Vertex*> &path, H
         Set<Vertex*>::iterator n;
         for(n=neighbours.begin();n!=neighbours.end();++n){
             Vertex* thisNeighbour = *n;
-            cout<<thisNeighbour->name<<endl;
             if(!visited.containsKey(thisNeighbour)){
                 visited.add(thisNeighbour,true);
                 if(dfs(graph,thisNeighbour,end,path,visited)){
@@ -98,20 +97,18 @@ Vector<Vertex*> depthFirstSearch(BasicGraph& graph, Vertex* start, Vertex* end) 
 Vector<Vertex*> breadthFirstSearch(BasicGraph& graph, Vertex* start, Vertex* end) {
     //reset graph before starting
     graph.resetData();
-
     Set<Vertex*> vertices = graph.getVertexSet();
     Set<Vertex*>::iterator n;
     Vector<Vertex*> path;
     Queue<Vertex *> queue;
+
     queue.add(start);
     start->visited = true;
     while(!queue.isEmpty()){
         Vertex *v = queue.dequeue(); //->GREEN
         v->setColor(GREEN);
-        path.add(v);
-        cout<<"Dequeued"<<v->name<<endl;
         if(v == end){
-            return path;
+            break;
         }
         Set<Vertex*> neighbours = graph.getNeighbors(v);
         Set<Vertex*>::iterator n;
@@ -120,12 +117,21 @@ Vector<Vertex*> breadthFirstSearch(BasicGraph& graph, Vertex* start, Vertex* end
             Vertex* thisNeighbour = *n;
             if(!thisNeighbour->visited){
                 thisNeighbour->visited = true; //mark as visited
+                thisNeighbour->previous = v;
                 queue.add(thisNeighbour); //add to queue -->YELLOW
-                cout<<"Queued:"<<thisNeighbour->name<<endl;
                 thisNeighbour->setColor(YELLOW);
             }
         }
     }
+    Vertex* prev = end;
+    Vector<Vertex *> reversePath;
+    while(prev!=start){
+        reversePath.add(prev);
+        prev = prev->previous;
+    }
+    reversePath.add(start);
+    for(int i=reversePath.size()-1;i>=0;i--)
+        path.add(reversePath[i]);
     return path;
 }
 
