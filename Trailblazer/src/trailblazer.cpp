@@ -7,24 +7,46 @@
 #include "queue.h"
 #include "hashmap.h"
 #include "stack.h"
+#include "pqueue.h"
+
 using namespace std;
 
-//Function to get index of an element in a vector
-int getElementIndex(Vertex* elem, Vector<Vertex*> vec){
-    Vector<Vertex*>::iterator it;
-    int i=0;
-    for(it=vec.begin();it!=vec.end();++it){
-        if(*it == elem){
-            return i;
-        }
-        i++;
-    }
-    return -1;
+//UTILITY FUNCTIONS START HERE
+void visitVertex(Vertex* vertex) {
+    vertex->visited = true;
+    vertex->setColor(GREEN);
 }
+void enqueueVertex(Vertex* vertex, Vertex* previous, double cost) {
+    vertex->cost = cost;
+    vertex->previous = previous;
+    vertex->setColor(YELLOW);
+}
+void reverseVector(Vector<Vertex*>& path) {
+    for(int i = 0; i < path.size() / 2; i++) {
+        int j = path.size() - 1 - i;
+        Vertex* tmp = path[i];
+        path[i] = path[j];
+        path[j] = tmp;
+    }
+}
+void determinePath(Vertex* start, Vertex* end, Vector<Vertex*>& path) {
+    Vertex* vertex = end;
+    while(true) {
+        path.add(vertex);
+        if(BasicGraph::compare(vertex, start) == 0) break;
+        if(!vertex->previous) {
+            path.clear();
+            break;
+        }
+        vertex = vertex->previous;
+    }
+    reverseVector(path);
+}
+
 
 bool dfs(BasicGraph& graph, Vertex* start, Vertex* end, Vector<Vertex*> &path, HashMap<Vertex*,bool> visited){
    //add v1 to path and mark as visited -> GREEN
-   start->setColor(GREEN);
+   visitVertex(start);
    if(start == end){
        return true;
    }else{
@@ -42,7 +64,6 @@ bool dfs(BasicGraph& graph, Vertex* start, Vertex* end, Vector<Vertex*> &path, H
                 thisNeighbour->setColor(GRAY);
                 visited.remove(thisNeighbour);
             }
-
         }
    }
    return false;
@@ -118,8 +139,9 @@ Vector<Vertex*> breadthFirstSearch(BasicGraph& graph, Vertex* start, Vertex* end
             if(!thisNeighbour->visited){
                 thisNeighbour->visited = true; //mark as visited
                 thisNeighbour->previous = v;
-                queue.add(thisNeighbour); //add to queue -->YELLOW
                 thisNeighbour->setColor(YELLOW);
+                queue.add(thisNeighbour); //add to queue -->YELLOW
+
             }
         }
     }
@@ -139,23 +161,91 @@ Vector<Vertex*> dijkstrasAlgorithm(BasicGraph& graph, Vertex* start, Vertex* end
     //reset graph before starting
     graph.resetData();
     Vector<Vertex*> path;
-    return path;
+
+    PriorityQueue<Vertex*> pqueue;
+        pqueue.enqueue(start, 0.0);
+        while(!pqueue.isEmpty()) {
+            Vertex* current = pqueue.dequeue();
+            visitVertex(current);
+            if(BasicGraph::compare(current, end) == 0) break;
+            for(Edge* edge : current->edges) {
+                double cost = current->cost + edge->cost;
+                if(!edge->finish->visited &&
+                   edge->finish->getColor() != YELLOW) {
+                    enqueueVertex(edge->finish, current, cost);
+                    pqueue.enqueue(edge->finish, cost);
+                }
+                if(edge->finish->getColor() == YELLOW &&
+                   cost < edge->finish->cost) {
+                    enqueueVertex(edge->finish, current, cost);
+                    pqueue.changePriority(edge->finish, cost);
+                }
+            }
+        }
+        determinePath(start, end, path);
+        return path;
 }
 
 Vector<Vertex*> aStar(BasicGraph& graph, Vertex* start, Vertex* end) {
-    // TODO: implement this function; remove these comments
-    //       (The function body code provided below is just a stub that returns
-    //        an empty vector so that the overall project will compile.
-    //        You should remove that code and replace it with your implementation.)
-    Vector<Vertex*> path;
-    return path;
+     graph.resetData();
+     Vector<Vertex*> path;
+     PriorityQueue<Vertex*> pqueue;
+     pqueue.enqueue(start, heuristicFunction(start, end));
+     while(!pqueue.isEmpty()) {
+         Vertex* current = pqueue.dequeue();
+         visitVertex(current);
+         if(BasicGraph::compare(current, end) == 0) break;
+         for(Edge* edge : current->edges) {
+             double cost = current->cost + edge->cost;
+             if(!edge->finish->visited &&
+                edge->finish->getColor() != YELLOW) {
+                 enqueueVertex(edge->finish, current, cost);
+                 pqueue.enqueue(edge->finish, cost +
+                                heuristicFunction(edge->finish, end));
+             }
+             if(edge->finish->getColor() == YELLOW &&
+                cost < edge->finish->cost) {
+                 enqueueVertex(edge->finish, current, cost);
+                 pqueue.changePriority(edge->finish, cost +
+                                       heuristicFunction(edge->finish, end));
+             }
+         }
+     }
+     determinePath(start, end, path);
+     return path;
 }
-
+void initializeClusters(BasicGraph& graph, Map<Vertex*, Set<Vertex*> >& clusters) {
+    Set<Vertex*> graphVertices = graph.getVertexSet();
+    for(Vertex* vertex : graphVertices) {
+        Set<Vertex*> otherVertices;  //Does a cluster include itself in connecting Vertices?
+        otherVertices.add(vertex);
+        clusters[vertex] = otherVertices;
+    }
+}
+void enqueueEdgeSet(BasicGraph& graph, PriorityQueue<Edge*>& pqueue) {
+    Set<Edge*> graphEdges = graph.getEdgeSet();
+    for(Edge* edge : graphEdges) {
+        pqueue.enqueue(edge, edge->cost);
+    }
+}
+void mergeClusters(Map<Vertex*, Set<Vertex*> >& clusters, Vertex* start, Vertex* finish) {
+    Set<Vertex*> otherVertices= clusters[start] + clusters[finish];
+    for(Vertex* vertex : clusters) {
+        if(otherVertices.contains(vertex)) clusters[vertex] = otherVertices;
+    }
+}
 Set<Edge*> kruskal(BasicGraph& graph) {
-    // TODO: implement this function; remove these comments
-    //       (The function body code provided below is just a stub that returns
-    //        an empty set so that the overall project will compile.
-    //        You should remove that code and replace it with your implementation.)
     Set<Edge*> mst;
+    Map<Vertex*, Set<Vertex*> > clusters;
+    PriorityQueue<Edge*> pqueue;
+    initializeClusters(graph, clusters);
+    enqueueEdgeSet(graph, pqueue);
+    while(!pqueue.isEmpty()) {
+        Edge* edge = pqueue.dequeue();
+        if(!clusters[edge->start].contains(edge->finish)) {
+            mergeClusters(clusters, edge->start, edge->finish);
+            mst.add(edge);
+        }
+    }
     return mst;
 }
