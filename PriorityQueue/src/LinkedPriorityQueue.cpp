@@ -1,8 +1,8 @@
-// This is a .cpp file you will edit and turn in.
-// We have provided a skeleton for you,
-// but you must finish it as described in the spec.
-// Also remove these comments here and add your own.
-// TODO: remove this comment header
+/*
+ * author: Mohit Chawla | mc2683@cornell.edu | Cornell Tech Connective Media
+ * Program decription:CS106b-assignment-5-priorityQueue-http://web.stanford.edu/class/archive/cs/cs106b/cs106b.1164//assn/pqueue.html
+ * date: 29 June 2017
+ */
 
 #include "LinkedPriorityQueue.h"
 

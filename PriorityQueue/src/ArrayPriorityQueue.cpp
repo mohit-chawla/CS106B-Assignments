@@ -1,3 +1,9 @@
+/*
+ * author: Mohit Chawla | mc2683@cornell.edu | Cornell Tech Connective Media
+ * Program decription:CS106b-assignment-5-priorityQueue-http://web.stanford.edu/class/archive/cs/cs106b/cs106b.1164//assn/pqueue.html
+ * date: 29 June 2017
+ */
+
 #include "ArrayPriorityQueue.h"
 
 static string QUEUE_EMPTY_EXCEPTION = "Queue Empty";
