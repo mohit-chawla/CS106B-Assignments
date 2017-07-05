@@ -12,15 +12,38 @@
 using namespace std;
 
 //UTILITY FUNCTIONS START HERE
+
+/*
+ * Visit a vertex, set cost, set prev, set color
+ * @param
+ * Vertex*:vertex
+ * @return
+*/
 void visitVertex(Vertex* vertex) {
     vertex->visited = true;
     vertex->setColor(GREEN);
 }
+
+/*
+ * Enqueue a vertex, set cost, set prev, set color
+ * @param
+ * Vertex*:vertex
+ * Vertex*:previous
+ * double:cost
+ * @return
+*/
 void enqueueVertex(Vertex* vertex, Vertex* previous, double cost) {
     vertex->cost = cost;
     vertex->previous = previous;
     vertex->setColor(YELLOW);
 }
+
+/*
+ * Reverse a given vector
+ * @param
+ * Vector<Vertex*>& : path
+ * @return
+*/
 void reverseVector(Vector<Vertex*>& path) {
     for(int i = 0; i < path.size() / 2; i++) {
         int j = path.size() - 1 - i;
@@ -29,7 +52,16 @@ void reverseVector(Vector<Vertex*>& path) {
         path[j] = tmp;
     }
 }
-void determinePath(Vertex* start, Vertex* end, Vector<Vertex*>& path) {
+
+/*
+ * Set the path of a given graph
+ * @param
+ * Vertex*:start
+ * Vertex*:end
+ * Vector<Vertex*>&:path
+ * @return
+*/
+void setPath(Vertex* start, Vertex* end, Vector<Vertex*>& path) {
     Vertex* vertex = end;
     while(true) {
         path.add(vertex);
@@ -43,7 +75,17 @@ void determinePath(Vertex* start, Vertex* end, Vector<Vertex*>& path) {
     reverseVector(path);
 }
 
-
+/*
+ * Recursive helper function for depthFirstSearch
+ * @param
+ * BasicGraph&:graph
+ * Vertex*:start
+ * Vertex*:end
+ * Vector<Vertex*>:&path
+ * HashMap<Vertex*,bool>:visited
+ * @return
+ * bool
+*/
 bool dfs(BasicGraph& graph, Vertex* start, Vertex* end, Vector<Vertex*> &path, HashMap<Vertex*,bool> visited){
    //add v1 to path and mark as visited -> GREEN
    visitVertex(start);
@@ -68,6 +110,54 @@ bool dfs(BasicGraph& graph, Vertex* start, Vertex* end, Vector<Vertex*> &path, H
    }
    return false;
 }
+
+
+/*
+ * Initialize clusters for Kruskal
+ * @param
+ * BasicGraph&:graph
+ * Map<Vertex*, Set<Vertex*>>: &clusters
+ * @return
+*/
+void initializeClusters(BasicGraph& graph, Map<Vertex*, Set<Vertex*>>& clusters) {
+    Set<Vertex*> graphVertices = graph.getVertexSet();
+    for(Vertex* vertex : graphVertices) {
+        Set<Vertex*> otherVertices;  //Does a cluster include itself in connecting Vertices?
+        otherVertices.add(vertex);
+        clusters[vertex] = otherVertices;
+    }
+}
+
+/*
+ * Enqueues the edge set into the priority queue
+ * @param
+ * BasicGraph&:graph
+ * PriorityQueue<Edge*>:&pqueue
+ * @return
+*/
+void enqueueEdgeSet(BasicGraph& graph, PriorityQueue<Edge*>& pqueue) {
+    Set<Edge*> graphEdges = graph.getEdgeSet();
+    for(Edge* edge : graphEdges) {
+        pqueue.enqueue(edge, edge->cost);
+    }
+}
+
+/*
+ * Enqueues the edge set into the priority queue
+ * @param
+ * Map<Vertex*, Set<Vertex*> >:&clusters
+ * Vertex*:start
+ * Vertex*:finish
+ * @return
+*/
+void mergeClusters(Map<Vertex*, Set<Vertex*> >& clusters, Vertex* start, Vertex* finish) {
+    Set<Vertex*> otherVertices= clusters[start] + clusters[finish];
+    for(Vertex* vertex : clusters) {
+        if(otherVertices.contains(vertex)) clusters[vertex] = otherVertices;
+    }
+}
+
+//UTILITY FUNCTIONS END HERE
 
 Vector<Vertex*> depthFirstSearch(BasicGraph& graph, Vertex* start, Vertex* end) {
     //reset graph before starting
@@ -115,6 +205,8 @@ Vector<Vertex*> depthFirstSearch(BasicGraph& graph, Vertex* start, Vertex* end) 
 
 //    return path;
 //}
+
+
 Vector<Vertex*> breadthFirstSearch(BasicGraph& graph, Vertex* start, Vertex* end) {
     //reset graph before starting
     graph.resetData();
@@ -182,7 +274,7 @@ Vector<Vertex*> dijkstrasAlgorithm(BasicGraph& graph, Vertex* start, Vertex* end
                 }
             }
         }
-        determinePath(start, end, path);
+        setPath(start, end, path);
         return path;
 }
 
@@ -211,29 +303,10 @@ Vector<Vertex*> aStar(BasicGraph& graph, Vertex* start, Vertex* end) {
              }
          }
      }
-     determinePath(start, end, path);
+     setPath(start, end, path);
      return path;
 }
-void initializeClusters(BasicGraph& graph, Map<Vertex*, Set<Vertex*> >& clusters) {
-    Set<Vertex*> graphVertices = graph.getVertexSet();
-    for(Vertex* vertex : graphVertices) {
-        Set<Vertex*> otherVertices;  //Does a cluster include itself in connecting Vertices?
-        otherVertices.add(vertex);
-        clusters[vertex] = otherVertices;
-    }
-}
-void enqueueEdgeSet(BasicGraph& graph, PriorityQueue<Edge*>& pqueue) {
-    Set<Edge*> graphEdges = graph.getEdgeSet();
-    for(Edge* edge : graphEdges) {
-        pqueue.enqueue(edge, edge->cost);
-    }
-}
-void mergeClusters(Map<Vertex*, Set<Vertex*> >& clusters, Vertex* start, Vertex* finish) {
-    Set<Vertex*> otherVertices= clusters[start] + clusters[finish];
-    for(Vertex* vertex : clusters) {
-        if(otherVertices.contains(vertex)) clusters[vertex] = otherVertices;
-    }
-}
+
 Set<Edge*> kruskal(BasicGraph& graph) {
     Set<Edge*> mst;
     Map<Vertex*, Set<Vertex*> > clusters;
