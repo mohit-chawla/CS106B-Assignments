@@ -44,6 +44,7 @@ HuffmanNode* buildEncodingTree(const Map<int, int>& frequencyTable) {
         pqueue.enqueue( new HuffmanNode(*i, frequencyTable[*i], NULL, NULL) , frequencyTable[*i]);
     }
     while(pqueue.size()>=2){
+        //get child nodes
         HuffmanNode* min1 = pqueue.dequeue();
         HuffmanNode* min2 = pqueue.dequeue();
         int newPriority = (min1->count + min2->count);
