@@ -24,7 +24,7 @@ HeapPriorityQueue::~HeapPriorityQueue() {
 
 void HeapPriorityQueue::changePriority(string value, int newPriority) {
     bool isFound = false;
-    if(isEmpty()){
+    if(!isEmpty()){
         for(int i=1;i<queueSize;i++){
             if(queue[i].name==value){
                 isFound = true;
