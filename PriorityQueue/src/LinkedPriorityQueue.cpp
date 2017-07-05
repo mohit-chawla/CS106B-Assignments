@@ -6,21 +6,33 @@
 
 #include "LinkedPriorityQueue.h"
 
+static string QUEUE_EMPTY_EXCEPTION = "Queue Empty";
+static string ELEMENT_NOT_FOUND_EXCEPTION = "Element not found";
+
 LinkedPriorityQueue::LinkedPriorityQueue() {
     head = NULL;
 }
 
 LinkedPriorityQueue::~LinkedPriorityQueue() {
-    // TODO: implement
-
+    while (head != NULL) {
+           ListNode *next = head->next;
+           delete head;
+           head = next;
+       }
 }
 
 void LinkedPriorityQueue::changePriority(string value, int newPriority) {
     ListNode *node = head;
-    while(node->value!=value){
-        node=node->next;
+    if(!isEmpty()){
+        while(node->value!=value && node!=NULL){
+            node=node->next;
+        }
+        node->priority=newPriority;
+        if(node==NULL)
+            throw ELEMENT_NOT_FOUND_EXCEPTION;
+    }else{
+        throw QUEUE_EMPTY_EXCEPTION;
     }
-    node->priority=newPriority;
 }
 
 void LinkedPriorityQueue::clear() {
@@ -28,12 +40,16 @@ void LinkedPriorityQueue::clear() {
 }
 
 string LinkedPriorityQueue::dequeue() {
-    string headNodeName = head->value;
-    ListNode* prevHead = head;
-    head = head->next;
-    //free memory to prevent memory leak
-    prevHead = NULL;
-    return headNodeName;
+    if(!isEmpty()){
+        string headNodeName = head->value;
+        ListNode* prevHead = head;
+        head = head->next;
+        //free memory to prevent memory leak
+        prevHead = NULL;
+        return headNodeName;
+    }else{
+        throw QUEUE_EMPTY_EXCEPTION;
+    }
 }
 
 void LinkedPriorityQueue::enqueue(string value, int priority) {
@@ -65,11 +81,19 @@ bool LinkedPriorityQueue::isEmpty() const {
 }
 
 string LinkedPriorityQueue::peek() const {
-    return head->value;
+    if(!isEmpty()){
+        return head->value;
+    }else{
+        throw QUEUE_EMPTY_EXCEPTION;
+    }
 }
 
 int LinkedPriorityQueue::peekPriority() const {
-    return head->priority;
+    if(!isEmpty()){
+        return head->priority;
+    }else{
+        throw QUEUE_EMPTY_EXCEPTION;
+    }
 }
 
 int LinkedPriorityQueue::size() const {
@@ -87,6 +111,8 @@ ostream& operator<<(ostream& out, const LinkedPriorityQueue& queue) {
     out<<"{";
     while(node!=NULL){
         out<<"\""+node->value+"\":"+std::to_string(node->priority);
+        if(node->next)
+            out<<",";
         node=node->next;
     }
     out<<"}";

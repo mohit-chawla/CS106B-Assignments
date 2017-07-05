@@ -6,6 +6,10 @@
 
 #include "HeapPriorityQueue.h"
 #include "queue.h"
+
+static string QUEUE_EMPTY_EXCEPTION = "Queue Empty";
+static string ELEMENT_NOT_FOUND_EXCEPTION = "Element not found";
+
 HeapPriorityQueue::HeapPriorityQueue() {
     arrayCapacity = 1000;
     node q[1000];
@@ -14,17 +18,26 @@ HeapPriorityQueue::HeapPriorityQueue() {
 }
 
 HeapPriorityQueue::~HeapPriorityQueue() {
-    // TODO: implement
-
+    node* arr = (node*)malloc(queueSize*(sizeof(node)));
+    free(arr);
 }
 
 void HeapPriorityQueue::changePriority(string value, int newPriority) {
-    for(int i=1;i<queueSize;i++){
-        if(queue[i].name==value){
-            queue[i].priority=newPriority;
-            break;
+    bool isFound = false;
+    if(isEmpty()){
+        for(int i=1;i<queueSize;i++){
+            if(queue[i].name==value){
+                isFound = true;
+                queue[i].priority=newPriority;
+                break;
+            }
         }
+        if(!isFound)
+            throw ELEMENT_NOT_FOUND_EXCEPTION;
+    }else{
+        throw QUEUE_EMPTY_EXCEPTION;
     }
+
 }
 
 void HeapPriorityQueue::clear() {
@@ -33,39 +46,42 @@ void HeapPriorityQueue::clear() {
 
 
 string HeapPriorityQueue::dequeue() {
-    string toReturn = queue[1].name;
-    queueSize--;
-    queue[1].name = queue[queueSize].name;
-    queue[1].priority = queue[queueSize].priority;
-    cout<<"Shifted last node"<<queue[queueSize].name<<" to root";
-    int temp = 1;
-    int child;
-    if(queue[temp*2].priority==queue[temp*2+1].priority){
-        child = queue[temp*2].name<queue[temp*2+1].name?temp*2:temp*2+1;
-    }else{
-        child = queue[temp*2].priority<queue[temp*2+1].priority?temp*2:temp*2+1;
-    }
-    int tempP;
-    string tempVal;
-    while(child < queueSize && queue[child].priority<=queue[temp].priority){
-        //Check for tie and break tie appropriately
-        if(queue[child].priority==queue[temp].priority && queue[child].name>queue[temp].name)
-            break;
-        //swap otherwise
-        tempP = queue[temp].priority;
-        tempVal = queue[temp].name;
-        queue[temp].name = queue[child].name;
-        queue[temp].priority = queue[child].priority;
-        queue[child].name = tempVal;
-        queue[child].priority = tempP;
-        temp = child;
+    if(!isEmpty()){
+        string toReturn = queue[1].name;
+        queueSize--;
+        queue[1].name = queue[queueSize].name;
+        queue[1].priority = queue[queueSize].priority;
+        int temp = 1;
+        int child;
         if(queue[temp*2].priority==queue[temp*2+1].priority){
             child = queue[temp*2].name<queue[temp*2+1].name?temp*2:temp*2+1;
         }else{
             child = queue[temp*2].priority<queue[temp*2+1].priority?temp*2:temp*2+1;
         }
+        int tempP;
+        string tempVal;
+        while(child < queueSize && queue[child].priority<=queue[temp].priority){
+            //Check for tie and break tie appropriately
+            if(queue[child].priority==queue[temp].priority && queue[child].name>queue[temp].name)
+                break;
+            //swap otherwise
+            tempP = queue[temp].priority;
+            tempVal = queue[temp].name;
+            queue[temp].name = queue[child].name;
+            queue[temp].priority = queue[child].priority;
+            queue[child].name = tempVal;
+            queue[child].priority = tempP;
+            temp = child;
+            if(queue[temp*2].priority==queue[temp*2+1].priority){
+                child = queue[temp*2].name<queue[temp*2+1].name?temp*2:temp*2+1;
+            }else{
+                child = queue[temp*2].priority<queue[temp*2+1].priority?temp*2:temp*2+1;
+            }
+        }
+        return toReturn;
+    }else{
+        throw QUEUE_EMPTY_EXCEPTION;
     }
-    return toReturn;
 }
 
 void HeapPriorityQueue::enqueue(string value, int priority) {
@@ -98,10 +114,19 @@ bool HeapPriorityQueue::isEmpty() const {
 }
 
 string HeapPriorityQueue::peek() const {
-    return queue[1].name;
+    if(!isEmpty()){
+        return queue[1].name;
+    }else{
+        throw QUEUE_EMPTY_EXCEPTION;
+    }
 }
 
 int HeapPriorityQueue::peekPriority() const {
+    if(!isEmpty()){
+        return queue[1].priority;
+    }else{
+        throw QUEUE_EMPTY_EXCEPTION;
+    }
     return queue[1].priority;
 }
 

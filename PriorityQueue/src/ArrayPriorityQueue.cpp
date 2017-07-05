@@ -4,6 +4,7 @@
  * date: 29 June 2017
  */
 
+
 #include "ArrayPriorityQueue.h"
 
 static string QUEUE_EMPTY_EXCEPTION = "Queue Empty";
@@ -17,8 +18,8 @@ ArrayPriorityQueue::ArrayPriorityQueue() {
 }
 
 ArrayPriorityQueue::~ArrayPriorityQueue() {
-    // TODO: implement
-
+    node* arr = (node*)malloc(qSize*(sizeof(node)));
+    free(arr);
 }
 
 void ArrayPriorityQueue::changePriority(string value, int newPriority) {
